@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class messageDAO {
-      public List<Message> getAllAuthors(){
+      public List<Message> getAllMessages(){
         Connection connection = ConnectionUtil.getConnection();
         List<Message> message = new ArrayList<>();
         try {
@@ -17,7 +17,10 @@ public class messageDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
-                Message message1 = new Message(rs.getInt("id"), rs.getInt("postedby"), rs.getString("text"),rs.getInt("timeposted"));
+                Message message1 = new Message(rs.getInt("message_id"), 
+                rs.getInt("posted_by"), 
+                rs.getString("message_text"),
+                rs.getLong("time_posted_epoch"));
                 message.add(message1);
             }
         }catch(SQLException e){
