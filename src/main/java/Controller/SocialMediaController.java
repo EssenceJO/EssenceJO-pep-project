@@ -37,7 +37,7 @@ public class SocialMediaController {
     }
 
     private void getMessagesByIdHandler(Context context) {
-        try {
+       
         int messageId = Integer.parseInt(context.pathParam("message_id"));
         Message message = messageService.getMessageById(messageId);
         context.json(message);
@@ -45,14 +45,9 @@ public class SocialMediaController {
         if (message != null) {
             context.json(message);
         } else {
-            context.status(404).result("Message not found.");
+            context.status(200).result(""); 
         }
-    } catch (NumberFormatException e) {
-        context.status(400).result("Invalid message ID.");
-    } catch (Exception e) {
-        e.printStackTrace(); // helpful for debugging
-        context.status(500).result("Internal server error.");}
-    }
+    } 
 
     private void getMessagesByUserHandler(Context ctx) {
         try {
