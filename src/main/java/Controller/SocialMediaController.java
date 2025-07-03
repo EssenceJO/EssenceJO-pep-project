@@ -21,6 +21,7 @@ public class SocialMediaController {
         // Define your endpoints
         app.get("/messages", this::getAllMessagesHandler);
         app.get("/accounts/{account_id}/messages",this::getMessagesByUserHandler);
+        app.get("/messages/{message_id}",this::getMessagesByIdHandler);
         // You can add more like app.post("/messages", this::addMessageHandler)
 
         return app;
@@ -32,7 +33,25 @@ public class SocialMediaController {
      */
     private void getAllMessagesHandler(Context context) {
         List<Message> messages = messageService.getAllMessages();
-        context.json(messages);  // Automatically serialized using Jackson
+        context.json(messages);  
+    }
+
+    private void getMessagesByIdHandler(Context context) {
+        try {
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
+        Message message = messageService.getMessageById(messageId);
+        context.json(message);
+        
+        if (message != null) {
+            context.json(message);
+        } else {
+            context.status(404).result("Message not found.");
+        }
+    } catch (NumberFormatException e) {
+        context.status(400).result("Invalid message ID.");
+    } catch (Exception e) {
+        e.printStackTrace(); // helpful for debugging
+        context.status(500).result("Internal server error.");}
     }
 
     private void getMessagesByUserHandler(Context ctx) {

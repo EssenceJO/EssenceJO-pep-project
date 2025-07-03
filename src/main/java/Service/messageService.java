@@ -32,6 +32,10 @@ public class messageService {
         return messageDAO.getAllMessagesFromUser(id);
     }
 
+    public Message getMessageById(int id) {
+    return messageDAO.getMessageById(id);
+}
+
      /**
      * TODO: Use the AuthorDAO to persist an author. The given Author will not have an id provided.
      *
