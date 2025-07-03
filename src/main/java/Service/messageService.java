@@ -44,6 +44,11 @@ public Message updateMessage(int messageId, Message updatedMessage) {
     return messageDAO.updateMessage(messageId, updatedMessage);
 }
 
+public Message deleteMessageById(int messageId) {
+    return messageDAO.deleteMessageById(messageId);
+}
+
+
 
      /**
      * TODO: Use the AuthorDAO to persist an author. The given Author will not have an id provided.

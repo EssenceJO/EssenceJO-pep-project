@@ -126,6 +126,29 @@ public Message updateMessage(int messageId, Message updatedMessage) {
     return null;
 }
 
+public Message deleteMessageById(int messageId) {
+    Connection connection = ConnectionUtil.getConnection();
+    try {
+        // First retrieve the message to return it later
+        Message messageToDelete = getMessageById(messageId);
+        if (messageToDelete == null) {
+            return null;
+        }
+
+        String sql = "DELETE FROM message WHERE message_id = ?";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setInt(1, messageId);
+        int rowsDeleted = ps.executeUpdate();
+
+        if (rowsDeleted > 0) {
+            return messageToDelete;
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 
 
 }

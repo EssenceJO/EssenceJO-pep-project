@@ -24,6 +24,8 @@ public class SocialMediaController {
         app.get("/messages/{message_id}",this::getMessagesByIdHandler);
         app.post("/messages", this::createMessageHandler);
         app.patch("/messages/{message_id}", this::patchMessageHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageHandler);
+
 
 
 
@@ -133,6 +135,22 @@ private void patchMessageHandler(Context ctx) {
     } catch (Exception e) {
         e.printStackTrace();
         ctx.status(400).result("");
+    }
+}
+
+private void deleteMessageHandler(Context ctx) {
+    try {
+        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        Message deletedMessage = messageService.deleteMessageById(messageId);
+
+        if (deletedMessage != null) {
+            ctx.status(200).json(deletedMessage);
+        } else {
+            ctx.status(200).result(""); // Message not found but still return 200 with empty body
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        ctx.status(400).result(""); // Bad path param or error
     }
 }
 
