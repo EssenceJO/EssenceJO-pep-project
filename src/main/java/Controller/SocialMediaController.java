@@ -1,19 +1,25 @@
 package Controller;
 
 import Service.messageService;
+import Model.Account;
 import Model.Message;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.util.List;
+import Service.userService;
 
 public class SocialMediaController {
 
     private messageService messageService;
+    private userService userService;
 
     public SocialMediaController() {
         this.messageService = new messageService();
+        this.userService = new userService();
     }
+
+    
 
     public Javalin startAPI() {
         Javalin app = Javalin.create();
@@ -25,6 +31,10 @@ public class SocialMediaController {
         app.post("/messages", this::createMessageHandler);
         app.patch("/messages/{message_id}", this::patchMessageHandler);
         app.delete("/messages/{message_id}", this::deleteMessageHandler);
+        app.post("/login", this::loginHandler);
+        app.post("/register", this::registerHandler);
+
+
 
 
 
@@ -76,29 +86,39 @@ public class SocialMediaController {
         }
     }
 
-    private void createMessageHandler(Context ctx) {
+ private void createMessageHandler(Context ctx) {
     try {
         Message newMessage = ctx.bodyAsClass(Message.class);
 
-        // Validate message_text: must not be blank and < 255 characters
-        String text = newMessage.getMessage_text();
-        if (text == null || text.trim().isEmpty() || text.length() >= 255) {
-            ctx.status(400).result("");  // ✅ return 400 with empty body
+        String messageText = newMessage.getMessage_text();
+        int userId = newMessage.getPosted_by();
+
+        // Validate message text
+        if (messageText == null || messageText.trim().isEmpty() || messageText.length() > 255) {
+            ctx.status(400).result("");
             return;
         }
 
-        Message createdMessage = messageService.createMessage(newMessage);
-        if (createdMessage != null) {
-            ctx.status(200).json(createdMessage);
+        // Check if user exists
+        Account user = userService.getUserById(userId);
+        if (user == null) {
+            ctx.status(400).result("");  // 👈 This makes the test pass
+            return;
+        }
+
+        Message created = messageService.createMessage(newMessage);
+        if (created != null) {
+            ctx.status(200).json(created);
         } else {
-            ctx.status(500).result("Message could not be created.");
+            ctx.status(400).result("");
         }
 
     } catch (Exception e) {
         e.printStackTrace();
-        ctx.status(400).result(""); // ✅ Invalid body = 400 with empty body
+        ctx.status(400).result("");
     }
 }
+
 
 private void patchMessageHandler(Context ctx) {
     try {
@@ -154,6 +174,58 @@ private void deleteMessageHandler(Context ctx) {
     }
 }
 
+private void loginHandler(Context ctx) {
+    try {
+        Account credentials = ctx.bodyAsClass(Account.class);
+
+        if (credentials.getUsername() == null || credentials.getPassword() == null) {
+            ctx.status(400).result("");
+            return;
+        }
+
+        Account user = userService.login(credentials.getUsername(), credentials.getPassword());
+
+        if (user != null) {
+            ctx.status(200).json(user);
+        } else {
+            ctx.status(401).result(""); // handle in a future test
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        ctx.status(400).result("");
+    }
+}
+
+private void registerHandler(Context ctx) {
+    try {
+        Account newUser = ctx.bodyAsClass(Account.class);
+
+        String username = newUser.getUsername();
+        String password = newUser.getPassword();
+
+        // Check for null, blank, or short password
+        if (username == null || password == null ||
+            username.trim().isEmpty() || password.trim().isEmpty() ||
+            password.length() < 4) {
+
+            ctx.status(400).result(""); 
+            return;
+        }
+
+        Account createdUser = userService.register(newUser);
+
+        if (createdUser != null) {
+            ctx.status(200).json(createdUser);
+        } else {
+            ctx.status(400).result("");
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        ctx.status(400).result("");
+    }
+}
 
 
 
